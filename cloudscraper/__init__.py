@@ -207,9 +207,6 @@ class CloudScraper(Session):
             self.stealth_mode.enable_randomize_headers(stealth_options.get('randomize_headers', True))
             self.stealth_mode.enable_browser_quirks(stealth_options.get('browser_quirks', True))
 
-        # will check ssl certificates
-        verify = kwargs.pop("verify", True)
-
         # Initialize the session
         super(CloudScraper, self).__init__(*args, **kwargs)
 
@@ -222,6 +219,9 @@ class CloudScraper(Session):
 
         if isinstance(self.cipherSuite, list):
             self.cipherSuite = ':'.join(self.cipherSuite)
+
+        # Will check SSL certificates
+        verify = kwargs.get("verify", True)
 
         # Mount the HTTPS adapter with our custom cipher suite
         self.mount(
