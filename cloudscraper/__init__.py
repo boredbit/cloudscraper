@@ -78,10 +78,10 @@ class CipherSuiteAdapter(HTTPAdapter):
 
         if not self.ssl_context:
             self.ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-
-            # self.ssl_context.orig_wrap_socket = self.ssl_context.wrap_socket
-            # self.ssl_context.wrap_socket = self.wrap_socket
             self.ssl_context.check_hostname = self.check_hostname
+
+            if not self.check_hostname:
+                self.ssl_context.verify_mode = ssl.CERT_NONE
 
             if self.server_hostname:
                 self.ssl_context.server_hostname = self.server_hostname
