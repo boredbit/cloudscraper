@@ -64,6 +64,7 @@ class CipherSuiteAdapter(HTTPAdapter):
         self.source_address = kwargs.pop('source_address', None)
         self.server_hostname = kwargs.pop('server_hostname', None)
         self.ecdhCurve = kwargs.pop('ecdhCurve', 'prime256v1')
+        self.verify = kwargs.pop('verify', True)
 
         if self.source_address:
             if isinstance(self.source_address, str):
@@ -94,11 +95,14 @@ class CipherSuiteAdapter(HTTPAdapter):
     # ------------------------------------------------------------------------------- #
 
     def wrap_socket(self, *args, **kwargs):
-        if hasattr(self.ssl_context, 'server_hostname') and self.ssl_context.server_hostname:
-            kwargs['server_hostname'] = self.ssl_context.server_hostname
-            self.ssl_context.check_hostname = False
+        if self.verify:
+            if hasattr(self.ssl_context, 'server_hostname') and self.ssl_context.server_hostname:
+                kwargs['server_hostname'] = self.ssl_context.server_hostname
+                self.ssl_context.check_hostname = False
+            else:
+                self.ssl_context.check_hostname = True
         else:
-            self.ssl_context.check_hostname = True
+            self.ssl_context.check_hostname = False
 
         return self.ssl_context.orig_wrap_socket(*args, **kwargs)
 
@@ -216,6 +220,7 @@ class CloudScraper(Session):
             self.cipherSuite = ':'.join(self.cipherSuite)
 
         # Mount the HTTPS adapter with our custom cipher suite
+        verify = kwargs.get("verify", True)
         self.mount(
             'https://',
             CipherSuiteAdapter(
@@ -223,7 +228,8 @@ class CloudScraper(Session):
                 ecdhCurve=self.ecdhCurve,
                 server_hostname=self.server_hostname,
                 source_address=self.source_address,
-                ssl_context=self.ssl_context
+                ssl_context=self.ssl_context,
+                verify=verify
             )
         )
 
