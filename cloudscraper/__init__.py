@@ -79,8 +79,9 @@ class CipherSuiteAdapter(HTTPAdapter):
         if not self.ssl_context:
             self.ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
 
-            self.ssl_context.orig_wrap_socket = self.ssl_context.wrap_socket
-            self.ssl_context.wrap_socket = self.wrap_socket
+            # self.ssl_context.orig_wrap_socket = self.ssl_context.wrap_socket
+            # self.ssl_context.wrap_socket = self.wrap_socket
+            self.ssl_context.check_hostname = self.check_hostname
 
             if self.server_hostname:
                 self.ssl_context.server_hostname = self.server_hostname
@@ -98,8 +99,10 @@ class CipherSuiteAdapter(HTTPAdapter):
     def wrap_socket(self, *args, **kwargs):
         if hasattr(self.ssl_context, 'server_hostname') and self.ssl_context.server_hostname:
             kwargs['server_hostname'] = self.ssl_context.server_hostname
+            self.ssl_context.check_hostname = False
+        else:
+            self.ssl_context.check_hostname = True
 
-        self.ssl_context.check_hostname = self.check_hostname
         return self.ssl_context.orig_wrap_socket(*args, **kwargs)
 
     # ------------------------------------------------------------------------------- #
