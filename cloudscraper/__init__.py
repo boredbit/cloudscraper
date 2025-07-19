@@ -55,7 +55,8 @@ class CipherSuiteAdapter(HTTPAdapter):
         '_pool_connections',
         '_pool_maxsize',
         '_pool_block',
-        'source_address'
+        'source_address',
+        'verify'
     ]
 
     def __init__(self, *args, **kwargs):
