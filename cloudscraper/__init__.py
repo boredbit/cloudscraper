@@ -56,7 +56,7 @@ class CipherSuiteAdapter(HTTPAdapter):
         '_pool_maxsize',
         '_pool_block',
         'source_address',
-        'verify'
+        'check_hostname'
     ]
 
     def __init__(self, *args, **kwargs):
@@ -65,7 +65,7 @@ class CipherSuiteAdapter(HTTPAdapter):
         self.source_address = kwargs.pop('source_address', None)
         self.server_hostname = kwargs.pop('server_hostname', None)
         self.ecdhCurve = kwargs.pop('ecdhCurve', 'prime256v1')
-        self.verify = kwargs.pop('verify', True)
+        self.check_hostname = kwargs.pop('check_hostname', True)
 
         if self.source_address:
             if isinstance(self.source_address, str):
@@ -99,7 +99,7 @@ class CipherSuiteAdapter(HTTPAdapter):
         if hasattr(self.ssl_context, 'server_hostname') and self.ssl_context.server_hostname:
             kwargs['server_hostname'] = self.ssl_context.server_hostname
 
-        self.ssl_context.check_hostname = self.verify
+        self.ssl_context.check_hostname = self.check_hostname
         return self.ssl_context.orig_wrap_socket(*args, **kwargs)
 
     # ------------------------------------------------------------------------------- #
@@ -203,7 +203,7 @@ class CloudScraper(Session):
             self.stealth_mode.enable_browser_quirks(stealth_options.get('browser_quirks', True))
 
         # Will check SSL certificates
-        verify = kwargs.pop("verify", True)
+        check_hostname = kwargs.pop("check_hostname", True)
 
         # Initialize the session
         super(CloudScraper, self).__init__(*args, **kwargs)
@@ -227,7 +227,7 @@ class CloudScraper(Session):
                 server_hostname=self.server_hostname,
                 source_address=self.source_address,
                 ssl_context=self.ssl_context,
-                verify=verify
+                check_hostname=check_hostname
             )
         )
 
